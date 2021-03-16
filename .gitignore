@@ -1,5 +1,7 @@
 model-hub/
 code-hub/
+pkg/
+cached_whl/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
