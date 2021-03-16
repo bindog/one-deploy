@@ -2,7 +2,7 @@
 
 ## 简介
 
-深度学习自动部署框架，整合了多个优秀开源项目，让部署变成简易轻松
+深度学习自动部署框架，整合了多个优秀开源项目，简**易(Yi)**轻松完成**部(Bu)**署
 
 ## 特性
 
@@ -30,6 +30,6 @@
 ## 整合开源项目列表
 
 - 官方[cortex](https://github.com/cortexlabs/cortex), 魔改[cortex](https://github.com/bindog/cortex)
-- 官方[registrator](https://github.com/gliderlabs/registrator), 魔改[registrator]()
+- 官方[registrator](https://github.com/gliderlabs/registrator), 魔改[registrator](https://github.com/bindog/registrator)
 - [consul](https://github.com/hashicorp/consul)
 - [consul-template](https://github.com/hashicorp/consul-template)
