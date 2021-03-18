@@ -65,17 +65,32 @@ services:
       - consul-node3
     command: -internal -explicit consul://consulserver:8500
 
-  loadbalancer:
+  loadbalancer_nginx:
     build:
-      context: ./load_balancing
+      context: ./load_balancing_nginx
       dockerfile: Dockerfile
     environment:
-      - consul_server_ip=consulserver
+      - CONSUL_SERVER_HOST=consulserver
     networks:
       - default 
-    hostname: lb
+    hostname: lbn
     ports:
       - "8900:8900"
+    depends_on:
+      - registrator
+  
+  loadbalancer_tengine:
+    build:
+      context: ./load_balancing_tengine
+      dockerfile: Dockerfile
+    environment:
+      - CONSUL_SERVER_HOST=consulserver
+    networks:
+      - default 
+    hostname: lbt
+    ports:
+      - "9900:9900"
+      - "9901:9901"
     depends_on:
       - registrator
 
