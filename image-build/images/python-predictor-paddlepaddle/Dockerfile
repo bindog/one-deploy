@@ -61,9 +61,8 @@ COPY ./cached_whl /tmp/cached_whl
 RUN pip install \
     /tmp/cached_whl/paddlepaddle_gpu-2.0.0.post110-cp37-cp37m-linux_x86_64.whl \
     Senta \
-    regex
-
-RUN rm -rf /tmp/cached_whl
+    regex \
+    && rm -rf /tmp/cached_whl
 
 COPY pkg/cortex/serve/ /src/cortex/serve
 RUN pip install --no-deps /src/cortex/serve/

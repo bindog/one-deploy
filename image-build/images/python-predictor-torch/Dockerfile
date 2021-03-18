@@ -59,9 +59,8 @@ RUN pip install --no-cache-dir \
 COPY ./cached_whl /tmp/cached_whl
 
 RUN pip install \
-    /tmp/cached_whl/torch-1.7.1+cu110-cp36-cp36m-linux_x86_64.whl
-
-RUN rm -rf /tmp/cached_whl
+    /tmp/cached_whl/torch-1.7.1+cu110-cp36-cp36m-linux_x86_64.whl \
+    && rm -rf /tmp/cached_whl
 
 COPY pkg/cortex/serve/ /src/cortex/serve
 RUN pip install --no-deps /src/cortex/serve/
