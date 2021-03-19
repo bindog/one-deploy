@@ -12,10 +12,15 @@ server {
   listen 8900;
   server_name localhost;
 
+  if ($args ~* direction=(\w+?)(&|$)) {
+    set $direction $1;
+    rewrite  ^/(.*)$  /$1_$direction  last;
+  }
+
   location = / {
-  default_type text/html;
-  add_header Content-Type 'text/html; charset=utf-8';
-  return 200 '<h1 style=" text-align: center; margin: 150px;">Welcome to AI Service</h1>';  
+    default_type text/html;
+    add_header Content-Type 'text/html; charset=utf-8';
+    return 200 '<h1 style=" text-align: center; margin: 150px;">Welcome to AI Service</h1>';  
   }
 
   {{range services}} {{$name := .Name}}
@@ -27,8 +32,8 @@ server {
   {{end}}
 
   location / {
-  default_type text/html;
-  add_header Content-Type 'text/html; charset=utf-8';
-  return 200 '<h1 style=" ext-align: center; margin: 150px; color: red">Error Page</h1>';
+    default_type text/html;
+    add_header Content-Type 'text/html; charset=utf-8';
+    return 200 '<h1 style=" ext-align: center; margin: 150px; color: red">Error Page</h1>';
   }
 }
