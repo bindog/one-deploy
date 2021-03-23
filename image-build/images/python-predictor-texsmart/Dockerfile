@@ -12,6 +12,8 @@ RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list &
         git \
         unzip \
         zlib1g-dev \
+        google-perftools \
+        libtcmalloc-minimal4 \
         locales \
         nginx=1.18.* \
     && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
@@ -22,6 +24,7 @@ RUN cd /tmp/ && \
     chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer / && rm /tmp/s6-overlay-amd64-installer
 
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS 2
+ENV LD_PRELOAD "/usr/lib/x86_64-linux-gnu/libtcmalloc.so.4"
 
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 LC_ALL=en_US.UTF-8
