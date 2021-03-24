@@ -57,14 +57,14 @@ docker-compose ps
 
 ## 3 服务注册&发现
 
-基本流程如下：
+### 3.1 基本流程
 
 1. 利用cortex部署算法服务容器(容器必须包含`SERVICE_*`打头的一系列环境变量)
 2. `registrator`通过监控`/var/run/docker.sock`文件获取所有启动/停止的容器情况
 3. `registrator`根据容器的`SERVICE_*`环境变量向`consul`集群注册该服务
 4. `consul-template`监控到`consul`集群中服务状态发生变化，根据预设模板生成新的`nginx.conf`文件并触发nginx服务reload
 
-### `SERVICE_*`环境变量说明
+### 3.2 `SERVICE_*`环境变量说明
 
 - `SERVICE_NAME`: 服务名
 - `SERVICE_NETWORK`: 服务网络(docker network)
@@ -91,3 +91,5 @@ env:
 ```
 
 ## 4 自动负载均衡
+
+`consul-template`与`nginx`在同一个docker内，`consul-template`通过监控consul集群中的服务状态变化情况，根据模板生成对应的`nginx.conf`文件（包含upstream中的server）并触发reload。但这种方式在reload时会有部分负载升高的情况，无法做到真正的无缝切换
