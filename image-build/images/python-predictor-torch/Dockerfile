@@ -1,4 +1,6 @@
-FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04
+#############################################################
+# First Stage
+FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04 as builder
 
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -64,6 +66,37 @@ RUN pip install \
 
 COPY pkg/cortex/serve/ /src/cortex/serve
 RUN pip install --no-deps /src/cortex/serve/
-RUN mv /src/cortex/serve/init/bootloader.sh /etc/cont-init.d/bootloader.sh
 
+#############################################################
+# Second Stage
+FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04
+
+RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && \ 
+    rm /etc/apt/sources.list.d/cuda.list && \
+    rm /etc/apt/sources.list.d/nvidia-ml.list && \
+    apt-get update -qq && apt-get install -y -q \
+        curl \
+        locales \
+        nginx=1.18.* \
+    && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
+
+RUN cd /tmp/ && \
+    curl -L --output s6-overlay-amd64-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.1.0.2/s6-overlay-amd64-installer" && \
+    cd - && \
+    chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer / && rm /tmp/s6-overlay-amd64-installer
+
+COPY --from=builder /opt/conda /opt/conda
+COPY --from=builder /root /root
+COPY --from=builder /src /src
+
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV S6_BEHAVIOUR_IF_STAGE2_FAILS 2
+RUN locale-gen en_US.UTF-8
+ENV LANG=en_US.UTF-8 LANGUAGE=en_US.en LC_ALL=en_US.UTF-8
+ENV PATH=/opt/conda/bin:$PATH
+ENV BASH_ENV=~/.env
+SHELL ["/bin/bash", "-c"]
+
+RUN mv /src/cortex/serve/init/bootloader.sh /etc/cont-init.d/bootloader.sh
 ENTRYPOINT ["/init"]
