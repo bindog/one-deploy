@@ -8,7 +8,7 @@ class PythonPredictor:
         self.model = LAC(mode='lac', use_cuda=use_cuda_flag)
 
     def predict(self, query_params, payload):
-        input_list = [p["text"] for p in payload]
+        input_list = [p["data"] for p in payload]
         result_list = self.model.run(input_list)
         final_result = []
         for i, result in enumerate(result_list):

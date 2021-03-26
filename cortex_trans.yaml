@@ -1,0 +1,29 @@
+- name: trans
+  kind: RealtimeAPI
+  predictor:
+    type: python
+    path: predictors/predictor_trans.py
+    image: cortexlabs/python-predictor-torch:0.25.0
+    dependencies:
+      pip: dependencies/requirements_trans.txt
+    config:
+      use_cuda: True
+      model_name: "Helsinki-NLP/opus-mt-en-zh"
+    server_side_batching:
+      max_batch_size: 8
+      batch_interval: 0.1s
+    processes_per_replica: 1
+    threads_per_process: 8
+    env:
+      SERVICE_NAME: "ais_trans"
+      SERVICE_NETWORK: "ai_service_proxy"
+      SERVICE_TAGS: "en-zh translation"
+      SERVICE_CHECK_HTTP: "/"
+      SERVICE_CHECK_INTERVAL: "15s"
+      SERVICE_CHECK_INITIAL_STATUS: "critical"
+      SERVICE_CHECK_DEREGISTER_AFTER: "15m"
+  compute:
+    gpu: 1
+    local_gpus: "2"
+  networking:
+    hostname: "trans_server"
