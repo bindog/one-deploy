@@ -24,6 +24,6 @@
       SERVICE_CHECK_DEREGISTER_AFTER: "15m"
   compute:
     gpu: 1
-    local_gpus: "2"
+    local_gpus: "0"
   networking:
     hostname: "trans_server"

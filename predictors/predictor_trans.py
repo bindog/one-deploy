@@ -8,6 +8,7 @@ class PythonPredictor:
         self.tokenizer = MarianTokenizer.from_pretrained(model_name)
         self.model = MarianMTModel.from_pretrained(model_name)
         self.model.eval()
+        self.model.half()
         self.model.cuda()
 
     def predict(self, query_params, payload):
