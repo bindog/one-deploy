@@ -1,35 +1,37 @@
-import sys
-from transformers import MarianMTModel, MarianTokenizer
+import torch
+from transformers import MBartForConditionalGeneration, MBart50TokenizerFast
 
 
 class PythonPredictor:
     def __init__(self, config):
         model_name = config.get("model_name", None)
-        self.tokenizer = MarianTokenizer.from_pretrained(model_name)
-        self.model = MarianMTModel.from_pretrained(model_name)
+        model_path = config.get("model_path", None)
+        device = config.get("device", 0)  # default on gpu 0
+        self.tokenizer = MBart50TokenizerFast.from_pretrained(model_path)
+        self.model = MBartForConditionalGeneration.from_pretrained(model_path)
         self.model.eval()
         self.model.half()
-        self.model.cuda()
+        self.device = torch.device("cpu" if device < 0 else "cuda:{}".format(device))
+        if self.device.type == "cuda":
+            self.model = self.model.to(self.device)
+
+    def ensure_tensor_on_device(self, **inputs):
+        return {name: tensor.to(self.device) for name, tensor in inputs.items()}
 
     def predict(self, query_params, payload):
-        input_list = [p["data"] for p in payload]
-        inputs = self.tokenizer(input_list, padding="max_length", max_length=512, truncation=True, return_tensors='pt')
-        outputs = self.model.generate(
-                                inputs.input_ids.cuda(),
-                                num_beams=4,
-                                max_length=512,
-                                early_stopping=True
-                            )
-        results = []
-        for output in outputs:
-            trans_text = self.tokenizer.decode(
-                                        output,
-                                        skip_special_tokens=True,
-                                        clean_up_tokenization_spaces=False
-                                    )
-            result_dict = {
-                "status": 200,
-                "result": trans_text
-            }
-            results.append(result_dict)
-        return results
+        # TODO: support multi lang batch
+        text = payload["data"]
+        src_lang = payload["src_lang"]
+        tgt_lang = payload["tgt_lang"]
+        self.tokenizer.src_lang = src_lang
+        encoded_inputs = self.tokenizer(text, return_tensors="pt")
+        encoded_inputs = self.ensure_tensor_on_device(**encoded_inputs)
+        generated_tokens = self.model.generate(
+            **encoded_inputs,
+            forced_bos_token_id=self.tokenizer.lang_code_to_id[tgt_lang]
+        )
+        output = self.tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+        return {
+            "status": 200,
+            "result": output[0]
+        }

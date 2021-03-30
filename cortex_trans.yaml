@@ -8,10 +8,9 @@
       pip: dependencies/requirements_trans.txt
     config:
       use_cuda: True
-      model_name: "Helsinki-NLP/opus-mt-en-zh"
-    server_side_batching:
-      max_batch_size: 8
-      batch_interval: 0.1s
+      device: 0
+      model_name: "facebook/mbart-large-50-many-to-many-mmt"
+      model_path: "./model-hub/mbart-large-50-many-to-many-mmt"
     processes_per_replica: 1
     threads_per_process: 8
     env:
