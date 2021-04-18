@@ -14,7 +14,7 @@
     processes_per_replica: 1
     threads_per_process: 8
     env:
-      SERVICE_NAME: "ais_cls"
+      SERVICE_NAME: "ais_cls_common"
       SERVICE_NETWORK: "ai_service_proxy"
       SERVICE_TAGS: "ultimate text classification"
       SERVICE_CHECK_HTTP: "/"

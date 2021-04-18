@@ -85,17 +85,21 @@ class PythonPredictor:
             scores = scores[..., 1]
 
         result = []
+        result_label = []
         for iseq in range(num_sequences):
             top_inds = list(reversed(scores[iseq].argsort()))
-            result.append(
-                {
-                    "sequence": sequences if isinstance(sequences, str) else sequences[iseq],
-                    "label_scores": {
-                        candidate_labels[i]: scores[iseq][i].item() for i in top_inds
-                    }
-                }
-            )
+            idx = top_inds[0]
+            result.append(idx.item())
+            result_label.append(candidate_labels[idx])
 
         if len(result) == 1:
-            return result[0]
-        return result
+            return {
+                "status": 200,
+                "result": result[0],
+                "result_label": result_label[0]
+            }
+        return {
+            "status": 200,
+            "result": result,
+            "result_label": result_label
+        }
