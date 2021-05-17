@@ -5,7 +5,7 @@
 ### 1.1 创建网络
 
 ```bash
-docker network create -d bridge ai_service_proxy
+docker network create -d overlay ai_service_proxy --attachable
 ```
 
 ### 1.2 构建多网络支持镜像registrator
@@ -18,22 +18,28 @@ cd registrator
 docker build . -f Dockerfile -t gliderlabs/registrator:multinetwork
 ```
 
-### 1.3 docker-compose构建
+### 1.3 构建nginx和tengine镜像
 
 ```bash
-docker-compose build
+docker build ./load_balancing_nginx
+docker build ./load_balancing_tengine
 ```
 
 ### 1.4 启动
 
 ```bash
-docker-compose up -d
+docker stack deloy -c docker-compose.yml ai
 ```
 
-### 1.5 停止
+### 1.5 查看状态
+```bash
+docker stack services ps ai
+```
+
+### 1.6 停止
 
 ```bash
-docker-compose down -v
+docer stack rm ai
 ```
 
 ## 2 管理
@@ -47,12 +53,6 @@ docker-compose down -v
 
 ```bash
 http://host_ip:8500
-```
-
-### 2.2 查看状态
-
-```bash
-docker-compose ps
 ```
 
 ## 3 服务注册&发现

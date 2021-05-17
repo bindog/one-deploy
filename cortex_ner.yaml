@@ -23,4 +23,5 @@
     local_gpus: "0"
   networking:
     local_port: 8903
-    hostname: "ner_server"
+    network_name: "ai_service_proxy"
+    network_driver: "overlay"

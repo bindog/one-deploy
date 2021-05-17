@@ -27,4 +27,5 @@
     local_gpus: "0"
   networking:
     local_port: 8901
-    hostname: "seg_server"
+    network_name: "ai_service_proxy"
+    network_driver: "overlay"

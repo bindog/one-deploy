@@ -25,4 +25,5 @@
     gpu: 1
     local_gpus: "0"
   networking:
-    hostname: "trans_server"
+    network_name: "ai_service_proxy"
+    network_driver: "overlay"

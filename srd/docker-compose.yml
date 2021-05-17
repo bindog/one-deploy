@@ -1,9 +1,10 @@
-version: '2'
+version: '3'
 
 networks:
   default:
     external:
-      name: ai_service_proxy  # you need to create a bridge network named ai_service_proxy manually or use cortex to deploy first
+      name: ai_service_proxy # you need to create a overlay network named ai_service_proxy with "--attachable" manually or use cortex to deploy first
+
 
 services:
   consul-node1:
@@ -13,6 +14,7 @@ services:
       - CONSUL_CLIENT_LAN_ADDRESS=0.0.0.0
       - CONSUL_DISABLE_KEYRING_FILE=true
       - CONSUL_RETRY_JOIN_ADDRESS=consul-node1
+      - CONSUL_BIND_INTERFACE=eth0
     networks:
       - default 
     hostname: consulserver
@@ -34,6 +36,7 @@ services:
       - CONSUL_DISABLE_KEYRING_FILE=true
       - CONSUL_RETRY_JOIN_ADDRESS=consul-node1
       - CONSUL_ENABLE_UI=false
+      - CONSUL_BIND_INTERFACE=eth0
     networks:
       - default 
     volumes:
@@ -47,11 +50,12 @@ services:
       - CONSUL_DISABLE_KEYRING_FILE=true
       - CONSUL_RETRY_JOIN_ADDRESS=consul-node1
       - CONSUL_ENABLE_UI=false
+      - CONSUL_BIND_INTERFACE=eth0
     networks:
       - default 
     volumes:
       - 'consul-node3_data:/bitnami'
-
+          
   registrator:
     image: gliderlabs/registrator:multinetwork  # you need to build this image from https://github.com/bindog/registrator
     networks:
@@ -59,16 +63,13 @@ services:
     hostname: registrator
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock"
-    depends_on:
-      - consul-node1
-      - consul-node2
-      - consul-node3
+  
     command: -internal -explicit consul://consulserver:8500
+    deploy:
+      mode: global # golbal模式会在每一个节点上都只创建一个service.
 
   loadbalancer_nginx:
-    build:
-      context: ./load_balancing_nginx
-      dockerfile: Dockerfile
+    image: load_balancing/nginx
     environment:
       - CONSUL_SERVER_HOST=consulserver
     networks:
@@ -80,9 +81,7 @@ services:
       - registrator
   
   loadbalancer_tengine:
-    build:
-      context: ./load_balancing_tengine
-      dockerfile: Dockerfile
+    image: load_balancing/tengine
     environment:
       - CONSUL_SERVER_HOST=consulserver
     networks:
