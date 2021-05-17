@@ -92,4 +92,4 @@ env:
 
 ## 4 自动负载均衡
 
-`consul-template`与`nginx`在同一个docker内，`consul-template`通过监控consul集群中的服务状态变化情况，根据模板生成对应的`nginx.conf`文件（包含upstream中的server）并触发reload。但这种方式在reload时会有部分负载升高的情况，无法做到真正的无缝切换
+`consul-template`与`nginx`在同一个docker内，`consul-template`通过监控consul集群中的服务状态变化情况，根据模板生成对应的`nginx.conf`文件（包含upstream中的server）并触发reload。但这种方式在reload时会有部分负载升高的情况，无法做到真正的无缝切换.
