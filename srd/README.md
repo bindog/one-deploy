@@ -12,6 +12,8 @@ docker network create -d overlay --attachable ai_service_proxy
 
 ### 1.2 启动
 
+启动前确保docker swarm集群中每个节点都**包含了所需镜像且版本一致**
+
 ```bash
 docker stack deploy -c docker-compose.yml ai
 ```
