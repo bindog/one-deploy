@@ -6,7 +6,7 @@
 - 自行准备拥有魔法的机器，构建完把镜像拷贝回来
 - 自行准备拥有魔法的代理，在执行build时通过`--build-arg "HTTP_PROXY=http://xxxx:xx" --build-arg "HTTPS_PROXY=http://xxxx:xx"`注入代理
 
-# 构建推理服务镜像
+## 构建推理服务镜像
 
 ```shell
 git clone https://github.com/bindog/one-deploy.git
@@ -18,11 +18,11 @@ docker build . -f images/python-predictor-cpu/Dockerfile -t cortexlabs/python-pr
 # 其他镜像同理
 ```
 
-# 构建集群所需要镜像
+## 构建集群所需要镜像
 
 这里涉及的镜像有三个，一个是支持多种网络的服务注册镜像`registrator`，另外两个是负载均衡所需镜像(触发式自动刷新配置)
 
-1. registrator镜像
+1. **registrator镜像**
 
 ```shell
 git clone https://github.com/bindog/registrator.git
@@ -30,7 +30,7 @@ cd registrator
 docker build . -f Dockerfile -t gliderlabs/registrator:multinetwork
 ```
 
-2. 负载均衡镜像
+2. **负载均衡镜像**
 
 ```shell
 cd one-deploy/srd
