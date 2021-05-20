@@ -33,3 +33,43 @@
 - 官方[registrator](https://github.com/gliderlabs/registrator), 魔改[registrator](https://github.com/bindog/registrator)
 - [consul](https://github.com/hashicorp/consul)
 - [consul-template](https://github.com/hashicorp/consul-template)
+
+# 快速开始
+
+## 代码结构
+
+```shell
+one-deploy
+├── code-hub                        # 预留
+│   └── README.md
+├── cortex_cls.yaml                 # 文本分类yaml示例
+├── cortex_ner.yaml                 # 命令实体识别yaml示例
+├── cortex_seg.yaml                 # 分词yaml示例
+├── cortex_trans.yaml               # 翻译yaml示例
+├── cortex.yaml.tmpl                # yaml模板文件
+├── dependencies                    # pip requirements(与示例对应)
+│   ├── requirements_cls.txt
+│   ├── requirements_ner.txt
+│   ├── requirements_seg.txt
+│   └── requirements_trans.txt
+├── image-build                     # 镜像构建目录
+│   ├── cached_whl                  # 本地缓存的whl文件
+│   ├── images                      # 不同类型镜像Dockerfile
+│   ├── pip.conf                    # pip配置
+│   ├── pkg                         # cortex服务端代码
+│   └── README.md
+├── LICENSE
+├── model-hub                       # 本地模型文件
+│   └── README.md
+├── predictors                      # 预测/推理代码(与示例对应)
+│   ├── predictor_cls.py
+│   ├── predictor_ner.py
+│   ├── predictor_seg.py
+│   └── predictor_trans.py
+├── README.md
+└── srd                             # 服务发现与负载均衡
+    ├── docker-compose.yml          # docker-compose文件
+    ├── load_balancing_nginx        # nginx负载均衡
+    ├── load_balancing_tengine      # tengine负载均衡(可选)
+    └── README.md
+```
