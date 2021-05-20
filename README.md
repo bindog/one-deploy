@@ -76,11 +76,11 @@ one-deploy
 
 ## 环境准备
 
-1. 准备魔改后的cortex可执行文件
+1. 准备魔改后的cortex可执行文件，请参考[文档](./docs/cortex-build.md)
 
-2. 准备所需各种镜像
+2. 准备所需各种镜像，请参考[文档](./docs/images-build.md)
 
-3. 准备docker swarm集群
+3. 准备docker swarm集群，请参考[文档](./docs/docker-swarm-cluster.md)
 
 ## Ready to go
 
