@@ -5,7 +5,6 @@ networks:
     external:
       name: ai_service_proxy # you need to create a overlay network named ai_service_proxy with "--attachable" manually or use cortex to deploy first
 
-
 services:
   consul-node1:
     image: bitnami/consul
@@ -66,7 +65,7 @@ services:
   
     command: -internal -explicit consul://consulserver:8500
     deploy:
-      mode: global # golbal模式会在每一个节点上都只创建一个service.
+      mode: global  # this service will run on every docker swarm node in global mode
 
   loadbalancer_nginx:
     image: load_balancing/nginx
