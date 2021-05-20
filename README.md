@@ -73,3 +73,28 @@ one-deploy
     ├── load_balancing_tengine      # tengine负载均衡(可选)
     └── README.md
 ```
+
+## 环境准备
+
+1. 准备魔改后的cortex可执行文件
+
+2. 准备所需各种镜像
+
+3. 准备docker swarm集群
+
+## Ready to go
+
+```shell
+cd srd
+# 创建overlay网络
+docker network create -d overlay ai_service_proxy --attachable
+# 创建服务注册&自动发现&负载均衡的集群
+docker stack deloy -c docker-compose.yml ai
+cd ..
+# 部署服务
+cortex deploy cortex_seg.yaml
+cortex deploy cortex_cls.yaml
+...
+# 在docker swarm集群的其他机器上也可
+cortex deploy cortex_ner.yaml
+```
