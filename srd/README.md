@@ -5,38 +5,23 @@
 ### 1.1 创建网络
 
 ```bash
-docker network create -d overlay ai_service_proxy --attachable
+docker network create -d overlay --attachable ai_service_proxy
 ```
 
-### 1.2 构建多网络支持镜像registrator
+构建镜像请参考[镜像构建文档](../docs/images-build.md)
 
-`gliderlabs/registrator`的官方镜像不支持多docker网络，默认只选择bridge网络，无法注册上其他网络上的服务，需要做适当魔改并重新构建
+### 1.2 启动
 
 ```bash
-git clone https://github.com/bindog/registrator.git
-cd registrator
-docker build . -f Dockerfile -t gliderlabs/registrator:multinetwork
+docker stack deploy -c docker-compose.yml ai
 ```
 
-### 1.3 构建nginx和tengine镜像
-
-```bash
-docker build ./load_balancing_nginx
-docker build ./load_balancing_tengine
-```
-
-### 1.4 启动
-
-```bash
-docker stack deloy -c docker-compose.yml ai
-```
-
-### 1.5 查看状态
+### 1.3 查看状态
 ```bash
 docker stack services ps ai
 ```
 
-### 1.6 停止
+### 1.4 停止
 
 ```bash
 docer stack rm ai
