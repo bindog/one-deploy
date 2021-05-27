@@ -109,6 +109,7 @@ def print_env_var_exports(env_vars: dict):
 
 
 def main(api_spec_path: str):
+    # print("[path]:",api_spec_path)
     with open(api_spec_path, "r") as f:
         api_config = json.load(f)
 
