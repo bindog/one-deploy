@@ -15,7 +15,6 @@
 import asyncio
 import inspect
 import json
-from logging import log
 import os
 import re
 import signal
@@ -42,8 +41,6 @@ from cortex_internal.lib.log import configure_logger
 from cortex_internal.lib.metrics import MetricsClient
 from cortex_internal.lib.telemetry import capture_exception, get_default_tags, init_sentry
 
-from cortex_internal.lib.gen_json_config import gen_json_file
-
 init_sentry(tags=get_default_tags())
 logger = configure_logger("cortex", os.environ["CORTEX_LOG_CONFIG_FILE"])
 
@@ -65,22 +62,22 @@ local_cache: Dict[str, Any] = {
 }
 
 
-# @app.on_event("startup")
-# def startup():
-#     open(f"/mnt/workspace/proc-{os.getpid()}-ready.txt", "a").close()
+@app.on_event("startup")
+def startup():
+    open(f"/mnt/workspace/proc-{os.getpid()}-ready.txt", "a").close()
 
 
-# @app.on_event("shutdown")
-# def shutdown():
-#     try:
-#         os.remove("/mnt/workspace/api_readiness.txt")
-#     except FileNotFoundError:
-#         pass
+@app.on_event("shutdown")
+def shutdown():
+    try:
+        os.remove("/mnt/workspace/api_readiness.txt")
+    except FileNotFoundError:
+        pass
 
-#     try:
-#         os.remove(f"/mnt/workspace/proc-{os.getpid()}-ready.txt")
-#     except FileNotFoundError:
-#         pass
+    try:
+        os.remove(f"/mnt/workspace/proc-{os.getpid()}-ready.txt")
+    except FileNotFoundError:
+        pass
 
 
 def is_allowed_request(request):
@@ -111,16 +108,17 @@ async def uncaught_exception_handler(request, e):
 @app.middleware("http")
 async def register_request(request: Request, call_next):
     request.state.start_time = time.time()
+
     file_id = None
     response = None
     try:
         if is_allowed_request(request):
             if "x-request-id" in request.headers:
                 request_id = request.headers["x-request-id"]
-            # else:
-            #     request_id = uuid.uuid1()
-            # file_id = f"/mnt/requests/{request_id}"
-            # open(file_id, "a").close()
+            else:
+                request_id = uuid.uuid1()
+            file_id = f"/mnt/requests/{request_id}"
+            open(file_id, "a").close()
 
         response = await call_next(request)
     finally:
@@ -136,6 +134,7 @@ async def register_request(request: Request, call_next):
                 status_code = response.status_code
             api: RealtimeAPI = local_cache["api"]
             api.metrics.post_request_metrics(status_code, time.time() - request.state.start_time)
+
     return response
 
 
@@ -264,14 +263,10 @@ def start():
 
 
 def start_fn():
-    # 生成json 配置文件
-    gen_json_file()
-
     project_dir = os.environ["CORTEX_PROJECT_DIR"]
     spec_path = os.environ["CORTEX_API_SPEC"]
     model_dir = os.getenv("CORTEX_MODEL_DIR")
-    # host_ip = os.environ["HOST_IP"]
-    host_ip = 'localhost'
+    host_ip = os.environ["HOST_IP"]
     tf_serving_port = os.getenv("CORTEX_TF_BASE_SERVING_PORT", "9000")
     tf_serving_host = os.getenv("CORTEX_TF_SERVING_HOST", "localhost")
 
@@ -300,12 +295,9 @@ def start_fn():
             tf_serving_host=tf_serving_host, tf_serving_port=tf_serving_port
         )
 
-        # with FileLock("/run/init_stagger.lock"):
-        #     logger.info("loading the handler from {}".format(api.path))
-        #     handler_impl = api.initialize_impl(
-        #         project_dir=project_dir, client=client, metrics_client=MetricsClient(statsd_client)
-        #     )
-        handler_impl = api.initialize_impl(
+        with FileLock("/run/init_stagger.lock"):
+            logger.info("loading the handler from {}".format(api.path))
+            handler_impl = api.initialize_impl(
                 project_dir=project_dir, client=client, metrics_client=MetricsClient(statsd_client)
             )
 
