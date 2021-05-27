@@ -36,22 +36,22 @@ handlers:
     stream: ext://sys.stdout
 loggers:
   cortex:
-    level: $CORTEX_LOG_LEVEL
+    level: INFO
     handlers:
       - default
     propagate: no
   uvicorn:
-    level: $CORTEX_LOG_LEVEL
+    level: INFO
     handlers:
       - uvicorn_access
     propagate: no
   uvicorn.error:
-    level: $CORTEX_LOG_LEVEL
+    level: INFO
     handlers:
       - uvicorn_access
     propagate: no
   uvicorn.access:
-    level: $CORTEX_LOG_LEVEL
+    level: INFO
     handlers:
       - uvicorn_access
     propagate: no

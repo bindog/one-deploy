@@ -14,6 +14,7 @@
 
 import imp
 import inspect
+import logging
 import os
 from copy import deepcopy
 from typing import List, Optional, Union, Any
@@ -239,7 +240,6 @@ class RealtimeAPI:
 
         Can raise UserRuntimeException/UserException/CortexException.
         """
-
         # build args
         class_impl = self.class_impl(project_dir, rpc_method_names)
         constructor_args = inspect.getfullargspec(class_impl.__init__).args
@@ -319,8 +319,8 @@ class RealtimeAPI:
             raise
 
         try:
-            validate_class_impl(handler_class, validations)
-            validate_handler_with_grpc(handler_class, self.api_spec, rpc_method_names)
+            # validate_class_impl(handler_class, validations)
+            # validate_handler_with_grpc(handler_class, self.api_spec, rpc_method_names)
             if self.type == PythonHandlerType:
                 validate_python_handler_with_models(handler_class, self.api_spec)
         except Exception as e:
@@ -352,7 +352,7 @@ class RealtimeAPI:
                     )
                 handler_class = class_df[1]
         if handler_class is None:
-            raise UserException(f"{target_class_name} class is not defined")
+            raise UserException(f"{target_class_name} class is not defined, [{module_name}],[{impl_path}],[{target_class_name}]")
 
         return handler_class
 

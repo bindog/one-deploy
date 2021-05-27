@@ -148,18 +148,18 @@ class CortexMetrics:
         statsd_client: DogStatsd,
         api_spec: Dict[str, Any],
     ):
-        self._metric_value_id = api_spec["id"]
-        self._metric_value_handler_id = api_spec["handler_id"]
-        self._metric_value_deployment_id = api_spec["deployment_id"]
+        # self._metric_value_id = api_spec["id"]
+        # self._metric_value_handler_id = api_spec["handler_id"]
+        # self._metric_value_deployment_id = api_spec["deployment_id"]
         self._metric_value_name = api_spec["name"]
         self.__statsd = statsd_client
 
     def metric_dimensions_with_id(self):
         return [
             {"Name": "api_name", "Value": self._metric_value_name},
-            {"Name": "api_id", "Value": self._metric_value_id},
-            {"Name": "handler_id", "Value": self._metric_value_handler_id},
-            {"Name": "deployment_id", "Value": self._metric_value_deployment_id},
+            # {"Name": "api_id", "Value": self._metric_value_id},
+            # {"Name": "handler_id", "Value": self._metric_value_handler_id},
+            # {"Name": "deployment_id", "Value": self._metric_value_deployment_id},
         ]
 
     def metric_dimensions(self):
