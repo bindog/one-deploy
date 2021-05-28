@@ -3,25 +3,15 @@ FROM ubuntu:20.04
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && \ 
-    apt-get update -qq && apt-get install -y -q \
+RUN apt-get update -qq && apt-get install -y -q \
         build-essential \
         pkg-config \
         software-properties-common \
         curl \
-        git \
         unzip \
         zlib1g-dev \
         locales \
-        nginx=1.18.* \
     && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
-
-RUN cd /tmp/ && \
-    curl -L --output s6-overlay-amd64-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.1.0.2/s6-overlay-amd64-installer" && \
-    cd - && \
-    chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer / && rm /tmp/s6-overlay-amd64-installer
-
-ENV S6_BEHAVIOUR_IF_STAGE2_FAILS 2
 
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 LC_ALL=en_US.UTF-8
@@ -33,7 +23,7 @@ ENV PYTHONVERSION=3.6.9
 # that's why a new separate conda environment is created
 # https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh
 # https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN curl "https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh" --output ~/miniconda.sh && \
+RUN curl "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh" --output ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm -rf ~/.cache ~/miniconda.sh
 
@@ -48,16 +38,17 @@ RUN /opt/conda/bin/conda create -n env -c conda-forge python=$PYTHONVERSION pip=
 ENV BASH_ENV=~/.env
 SHELL ["/bin/bash", "-c"]
 
-COPY ./pip.conf /root/.pip/pip.conf
-COPY pkg/cortex/serve/serve.requirements.txt /src/cortex/serve/serve.requirements.txt
-COPY pkg/cortex/serve/cortex_internal.requirements.txt /src/cortex/serve/cortex_internal.requirements.txt
-
+COPY serve/serve.requirements.txt /src/cortex/serve/serve.requirements.txt
+COPY serve/cortex_internal.requirements.txt /src/cortex/serve/cortex_internal.requirements.txt
 RUN pip install --no-cache-dir \
     -r /src/cortex/serve/serve.requirements.txt \
     -r /src/cortex/serve/cortex_internal.requirements.txt
 
-COPY pkg/cortex/serve/ /src/cortex/serve
-RUN pip install --no-deps /src/cortex/serve/
-RUN mv /src/cortex/serve/init/bootloader.sh /etc/cont-init.d/bootloader.sh
+COPY serve/init/install-core-dependencies.sh /usr/local/cortex/install-core-dependencies.sh
+RUN chmod +x /usr/local/cortex/install-core-dependencies.sh
 
-ENTRYPOINT ["/init"]
+COPY serve/ /src/cortex/serve
+COPY gen_json_file.py /src/gen_json_file.py
+ENV CORTEX_LOG_CONFIG_FILE /src/cortex/serve/log_config.yaml
+
+ENTRYPOINT ["/bin/bash", "/src/cortex/serve/init/bootloader_k8s.sh"]

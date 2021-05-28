@@ -3,13 +3,13 @@ from LAC import LAC
 from stopwordsiso import stopwords
 
 
-class PythonPredictor:
+class Handler:
     def __init__(self, config):
         self.all_stopwords = stopwords(["en", "zh"])
         use_cuda_flag = config.get("use_cuda", False)
         self.model = LAC(mode='seg', use_cuda=use_cuda_flag)
 
-    def predict(self, query_params, payload):
+    def handle_post(self, query_params, payload):
         input_list = [p["data"] for p in payload]
         result_list = self.model.run(input_list)
         final_result = []

@@ -320,7 +320,7 @@ class RealtimeAPI:
 
         try:
             validate_class_impl(handler_class, validations)
-            validate_handler_with_grpc(handler_class, self.api_spec, rpc_method_names)
+            # validate_handler_with_grpc(handler_class, self.api_spec, rpc_method_names)
             if self.type == PythonHandlerType:
                 validate_python_handler_with_models(handler_class, self.api_spec)
         except Exception as e:
