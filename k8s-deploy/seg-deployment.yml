@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seg-deployment
+  labels:
+    app: seg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seg
+  template:
+    metadata:
+      labels:
+        app: seg
+    spec:
+      initContainers:
+      - name: download
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://192.168.4.99:8792/nlp-models/seg/?op=archive"]
+        volumeMounts:
+        - name: projectdir
+          mountPath: "/mnt/project"
+      - name: install
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["unzip", "/mnt/project/deploy.zip", "-d", "/mnt/project"]
+        volumeMounts:
+        - name: workspacedir
+          mountPath: "/mnt/workspace"
+        - name: projectdir
+          mountPath: "/mnt/project"
+      containers:
+      - name: seg-c
+        image: 192.168.4.99:8443/ai/cortex-cpu-test:may
+        imagePullPolicy: Always
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        env:
+          - name: CORTEX_API_SPEC
+            value: "/mnt/project/api-spec.json"
+        ports:
+          - containerPort: 8888
+        volumeMounts:
+        - name: workspacedir
+          mountPath: "/mnt/workspace"
+        - name: projectdir
+          mountPath: "/mnt/project"
+      volumes:
+      - name: workspacedir
+        emptyDir: {}
+      - name: projectdir
+        emptyDir: {}

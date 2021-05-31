@@ -3,7 +3,8 @@ FROM ubuntu:20.04
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update -qq && apt-get install -y -q \
+RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && \
+    apt-get update -qq && apt-get install -y -q \
         build-essential \
         pkg-config \
         software-properties-common \
@@ -38,6 +39,10 @@ RUN /opt/conda/bin/conda create -n env -c conda-forge python=$PYTHONVERSION pip=
 ENV BASH_ENV=~/.env
 SHELL ["/bin/bash", "-c"]
 
+RUN mkdir ~/.pip && \
+    printf '%s\n%s\n%s\n' '[global]' 'trusted-host = mirrors.aliyun.com' \
+    'index-url = https://mirrors.aliyun.com/pypi/simple' >> ~/.pip/pip.conf
+
 COPY serve/serve.requirements.txt /src/cortex/serve/serve.requirements.txt
 COPY serve/cortex_internal.requirements.txt /src/cortex/serve/cortex_internal.requirements.txt
 RUN pip install --no-cache-dir \
@@ -48,7 +53,5 @@ COPY serve/init/install-core-dependencies.sh /usr/local/cortex/install-core-depe
 RUN chmod +x /usr/local/cortex/install-core-dependencies.sh
 
 COPY serve/ /src/cortex/serve
-COPY gen_json_file.py /src/gen_json_file.py
-ENV CORTEX_LOG_CONFIG_FILE /src/cortex/serve/log_config.yaml
 
 ENTRYPOINT ["/bin/bash", "/src/cortex/serve/init/bootloader_k8s.sh"]

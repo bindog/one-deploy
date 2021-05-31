@@ -7,7 +7,6 @@ export CORTEX_DEBUGGING=${CORTEX_DEBUGGING:-"true"}
 mkdir -p /mnt/workspace
 mkdir -p /mnt/requests
 
-eval $(/opt/conda/envs/env/bin/python /src/gen_json_file.py)
 eval $(/opt/conda/envs/env/bin/python /src/cortex/serve/init/export_env_vars.py $CORTEX_API_SPEC)
 
 cd /mnt/project
