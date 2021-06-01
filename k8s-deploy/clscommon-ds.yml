@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: seg-deployment
+  name: clscommon-deployment
   labels:
-    app: seg
+    app: clscommon
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: seg
+      app: clscommon
   template:
     metadata:
       labels:
-        app: seg
+        app: clscommon
     spec:
       initContainers:
       - name: download
@@ -29,7 +29,7 @@ spec:
               configMapKeyRef:
                 name: ais-config
                 key: nlp_prefix
-        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://${FILE_SERVER}/${NLP_PREFIX}/seg/?op=archive"]
+        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://$(FILE_SERVER)/$(NLP_PREFIX)/clscommon/?op=archive"]
         volumeMounts:
         - name: projectdir
           mountPath: "/mnt/project"
@@ -41,9 +41,12 @@ spec:
         - name: projectdir
           mountPath: "/mnt/project"
       containers:
-      - name: seg-c
-        image: 192.168.4.99:8443/ai/cortex-cpu-test:may
-        imagePullPolicy: Always
+      - name: clscommon-e
+        image: 192.168.4.99:8443/ai/cortex-gpu-test:may
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            nvidia.com/gpu: 1
         env:
           - name: CORTEX_API_SPEC
             value: "/mnt/project/api-spec.json"
@@ -53,12 +56,18 @@ spec:
           httpGet:
             path: /
             port: 8888
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
           failureThreshold: 2
           periodSeconds: 15
         startupProbe:
           httpGet:
             path: /
             port: 8888
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
           initialDelaySeconds: 30
           failureThreshold: 50
           periodSeconds: 15
@@ -76,10 +85,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: seg-service
+  name: clscommon-service
 spec:
   selector:
-    app: seg
+    app: clscommon
   ports:
     - protocol: TCP
       port: 9999

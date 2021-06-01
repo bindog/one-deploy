@@ -1,0 +1,30 @@
+{
+    "id": "9527",
+    "handler_id": "handler_9527",
+    "deployment_id": "deployment_9527",
+    "name": "cls",
+    "kind": "RealtimeAPI",
+    "apis": null,
+    "handler": {
+        "type": "python",
+        "path": "./predictor.py",
+        "multi_model_reloading": null,
+        "models": null,
+        "processes_per_replica": 1,
+        "threads_per_process": 8,
+        "server_side_batching": null,
+        "dependencies": {
+            "pip": "./requirements.txt",
+            "conda": "./conda-packages.txt",
+            "shell": "./dependencies.sh"
+        },
+        "tensorflow_serving_image": "",
+        "log_level": "info"
+    },
+    "compute": {
+        "cpu": "500m",
+        "mem": null,
+        "gpu": 0,
+        "inf": 0
+    }
+}

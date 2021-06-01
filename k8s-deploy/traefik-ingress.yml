@@ -8,6 +8,13 @@ spec:
   rules:
   - http:
       paths:
+      - path: /face
+        pathType: Prefix
+        backend:
+          service:
+            name: insightface-service
+            port:
+              number: 8082
       - path: /seg
         pathType: Prefix
         backend:
@@ -20,5 +27,12 @@ spec:
         backend:
           service:
             name: trans-service
+            port:
+              number: 9999
+      - path: /cls
+        pathType: Prefix
+        backend:
+          service:
+            name: clscommon-service
             port:
               number: 9999
