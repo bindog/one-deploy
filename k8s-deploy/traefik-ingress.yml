@@ -36,3 +36,10 @@ spec:
             name: clscommon-service
             port:
               number: 9999
+      - path: /summary
+        pathType: Prefix
+        backend:
+          service:
+            name: summary-service
+            port:
+              number: 9999
