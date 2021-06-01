@@ -18,7 +18,18 @@ spec:
       - name: download
         image: busybox
         imagePullPolicy: IfNotPresent
-        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://192.168.4.99:8792/nlp-models/seg/?op=archive"]
+        env:
+          - name: FILE_SERVER
+            valueFrom:
+              configMapKeyRef:
+                name: ais-config
+                key: file_server
+          - name: NLP_PREFIX
+            valueFrom:
+              configMapKeyRef:
+                name: ais-config
+                key: nlp_prefix
+        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://${FILE_SERVER}/${NLP_PREFIX}/seg/?op=archive"]
         volumeMounts:
         - name: projectdir
           mountPath: "/mnt/project"
@@ -27,8 +38,6 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ["unzip", "/mnt/project/deploy.zip", "-d", "/mnt/project"]
         volumeMounts:
-        - name: workspacedir
-          mountPath: "/mnt/workspace"
         - name: projectdir
           mountPath: "/mnt/project"
       containers:
@@ -43,6 +52,19 @@ spec:
             value: "/mnt/project/api-spec.json"
         ports:
           - containerPort: 8888
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8888
+          failureThreshold: 2
+          periodSeconds: 15
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8888
+          initialDelaySeconds: 30
+          failureThreshold: 50
+          periodSeconds: 15
         volumeMounts:
         - name: workspacedir
           mountPath: "/mnt/workspace"
@@ -53,3 +75,15 @@ spec:
         emptyDir: {}
       - name: projectdir
         emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seg-service
+spec:
+  selector:
+    app: seg
+  ports:
+    - protocol: TCP
+      port: 9999
+      targetPort: 8888
