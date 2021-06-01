@@ -21,3 +21,6 @@ class Handler:
             else:
                 final_result.append(result)
         return final_result
+    
+    def handle_get(self, query_params):
+        return "API alive"
