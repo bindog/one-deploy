@@ -43,3 +43,10 @@ spec:
             name: summary-service
             port:
               number: 9999
+      - path: /sembeddings
+        pathType: Prefix
+        backend:
+          service:
+            name: sembeddings-service
+            port:
+              number: 9999
