@@ -1,6 +1,6 @@
 #############################################################
 # First Stage
-FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04 as builder
+FROM nvidia/cuda:11.1.1-cudnn8-runtime-ubuntu20.04 as builder
 
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -19,13 +19,6 @@ RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list &
         locales \
         nginx=1.18.* \
     && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
-
-RUN cd /tmp/ && \
-    curl -L --output s6-overlay-amd64-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.1.0.2/s6-overlay-amd64-installer" && \
-    cd - && \
-    chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer / && rm /tmp/s6-overlay-amd64-installer
-
-ENV S6_BEHAVIOUR_IF_STAGE2_FAILS 2
 
 RUN locale-gen en_US.UTF-8
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US.en LC_ALL=en_US.UTF-8
@@ -50,26 +43,24 @@ RUN /opt/conda/bin/conda create -n env -c conda-forge python=$PYTHONVERSION pip=
 ENV BASH_ENV=~/.env
 SHELL ["/bin/bash", "-c"]
 
-COPY ./pip.conf /root/.pip/pip.conf
-COPY pkg/cortex/serve/serve.requirements.txt /src/cortex/serve/serve.requirements.txt
-COPY pkg/cortex/serve/cortex_internal.requirements.txt /src/cortex/serve/cortex_internal.requirements.txt
+RUN mkdir ~/.pip && \
+    printf '%s\n%s\n%s\n' '[global]' 'trusted-host = mirrors.aliyun.com' \
+    'index-url = https://mirrors.aliyun.com/pypi/simple' >> ~/.pip/pip.conf
 
+COPY serve/serve.requirements.txt /src/cortex/serve/serve.requirements.txt
+COPY serve/cortex_internal.requirements.txt /src/cortex/serve/cortex_internal.requirements.txt
 RUN pip install --no-cache-dir \
     -r /src/cortex/serve/serve.requirements.txt \
     -r /src/cortex/serve/cortex_internal.requirements.txt
+RUN pip install --no-cache-dir torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
 
-COPY ./cached_whl /tmp/cached_whl
+COPY serve/init/install-core-dependencies.sh /usr/local/cortex/install-core-dependencies.sh
+RUN chmod +x /usr/local/cortex/install-core-dependencies.sh
 
-RUN pip install \
-    /tmp/cached_whl/torch-1.7.1+cu110-cp36-cp36m-linux_x86_64.whl \
-    && rm -rf /tmp/cached_whl
-
-COPY pkg/cortex/serve/ /src/cortex/serve
-RUN pip install --no-deps /src/cortex/serve/
-
+COPY serve/ /src/cortex/serve
 #############################################################
 # Second Stage
-FROM nvidia/cuda:11.0.3-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:11.1.1-cudnn8-runtime-ubuntu20.04
 
 RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list && \ 
     rm /etc/apt/sources.list.d/cuda.list && \
@@ -80,14 +71,10 @@ RUN sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list &
         nginx=1.18.* \
     && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
 
-RUN cd /tmp/ && \
-    curl -L --output s6-overlay-amd64-installer "https://github.com/just-containers/s6-overlay/releases/download/v2.1.0.2/s6-overlay-amd64-installer" && \
-    cd - && \
-    chmod +x /tmp/s6-overlay-amd64-installer && /tmp/s6-overlay-amd64-installer / && rm /tmp/s6-overlay-amd64-installer
-
 COPY --from=builder /opt/conda /opt/conda
 COPY --from=builder /root /root
 COPY --from=builder /src /src
+COPY --from=builder /usr/local/cortex/install-core-dependencies.sh /usr/local/cortex/install-core-dependencies.sh
 
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -98,5 +85,4 @@ ENV PATH=/opt/conda/bin:$PATH
 ENV BASH_ENV=~/.env
 SHELL ["/bin/bash", "-c"]
 
-RUN mv /src/cortex/serve/init/bootloader.sh /etc/cont-init.d/bootloader.sh
-ENTRYPOINT ["/init"]
+ENTRYPOINT ["/bin/bash", "/src/cortex/serve/init/bootloader_k8s.sh"]

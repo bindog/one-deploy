@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ais-config
+  namespace: ais
+data:
+  private_registry: 192.168.4.99:8443
+  file_server: 192.168.4.99:8792
+  cv_prefix: cv-models
+  nlp_prefix: nlp-models
