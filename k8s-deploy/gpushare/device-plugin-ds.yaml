@@ -23,7 +23,7 @@ spec:
       nodeSelector:
         gpushare: "true"
       containers:
-      - image: registry.cn-hangzhou.aliyuncs.com/acs/k8s-gpushare-plugin:v2-1.11-aff8a23
+      - image: 192.168.4.99:8443/ai/gpushare-plugin:may
         name: gpushare
         # Make this pod as Guaranteed pod which will never be evicted because of node's resource consumption.
         command:

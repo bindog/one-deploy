@@ -46,7 +46,7 @@ spec:
         imagePullPolicy: IfNotPresent
         resources:
           limits:
-            nvidia.com/gpu: 1
+            aliyun.com/gpu-mem: 5
         env:
           - name: CORTEX_API_SPEC
             value: "/mnt/project/api-spec.json"

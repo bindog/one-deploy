@@ -102,7 +102,7 @@ spec:
       serviceAccount: gpushare-schd-extender
       containers:
         - name: gpushare-schd-extender
-          image: registry.cn-hangzhou.aliyuncs.com/acs/k8s-gpushare-schd-extender:1.11-d170d8a
+          image: 192.168.4.99:8443/ai/gpushare-scheduler-extender:may
           env:
           - name: LOG_LEVEL
             value: debug
@@ -129,4 +129,4 @@ spec:
   selector:
     # select app=ingress-nginx pods
     app: gpushare
-    component: gpushare-schd-extender   
+    component: gpushare-schd-extender
