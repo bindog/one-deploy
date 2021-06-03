@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insightface-deployment
+  labels:
+    app: insightface
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: insightface
+  template:
+    metadata:
+      labels:
+        app: insightface
+    spec:
+      containers:
+      - name: insightface-rest
+        image: 192.168.4.99:8443/ai/insightface-rest:v0.5.9.9a
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: LOG_LEVEL 
+          value: INFO
+        - name: PYTHONUNBUFFERED
+          value: "0"
+        - name: PORT
+          value: "18080"
+        - name: NUM_WORKERS
+          value: "1"
+        - name: INFERENCE_BACKEND
+          value: trt
+        - name: FORCE_FP16
+          value: "False"
+        - name: DET_NAME
+          value: retinaface_r50_v1
+        - name: DET_THRESH
+          value: "0.6"
+        - name: REC_NAME
+          value: arcface_r100_v1
+        - name: REC_IGNORE
+          value: "False"
+        - name: REC_BATCH_SIZE
+          value: "1"
+        - name: GA_NAME
+          value: genderage_v1
+        - name: GA_IGNORE
+          value: "False"
+        - name: KEEP_ALL
+          value: "True"
+        - name: MAX_SIZE
+          value: "640,640"
+        - name: DEF_RETURN_FACE_DATA
+          value: "False"
+        - name: DEF_EXTRACT_EMBEDDING
+          value: "True"
+        - name: DEF_EXTRACT_GA
+          value: "True"
+        - name: DEF_API_VER
+          value: "1"
+        resources:
+          limits:
+            aliyun.com/gpu-mem: 5
+        ports:
+          - containerPort: 18080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: insightface-service
+spec:
+  selector:
+    app: insightface
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 18080
+
