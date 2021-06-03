@@ -29,7 +29,9 @@ spec:
               configMapKeyRef:
                 name: ais-config
                 key: nlp_prefix
-        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://$(FILE_SERVER)/$(NLP_PREFIX)/summary/?op=archive"]
+          - name: MODEL_NAME
+            value: "summary"  # the folder name in http server
+        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://$(FILE_SERVER)/$(NLP_PREFIX)/$(MODEL_NAME)/?op=archive"]
         volumeMounts:
         - name: projectdir
           mountPath: "/mnt/project"
