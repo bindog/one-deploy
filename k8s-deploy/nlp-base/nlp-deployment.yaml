@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: base-deployment
+  labels:
+    app: base
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: base
+  template:
+    metadata:
+      labels:
+        app: base
+    spec:
+      initContainers:
+      - name: download
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: FILE_SERVER
+            valueFrom:
+              configMapKeyRef:
+                name: ais-config
+                key: file_server
+          - name: NLP_PREFIX
+            valueFrom:
+              configMapKeyRef:
+                name: ais-config
+                key: nlp_prefix
+          - name: MODEL_NAME
+            value: "base_model_name"  # the folder name in http server
+        command: ["wget", "-O", "/mnt/project/deploy.zip", "http://$(FILE_SERVER)/$(NLP_PREFIX)/$(MODEL_NAME)/?op=archive"]
+        volumeMounts:
+        - name: projectdir
+          mountPath: "/mnt/project"
+      - name: install
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["unzip", "/mnt/project/deploy.zip", "-d", "/mnt/project"]
+        volumeMounts:
+        - name: projectdir
+          mountPath: "/mnt/project"
+      containers:
+      - name: base-name
+        image: base-image:tag
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            aliyun.com/gpu-mem: 5
+        env:
+          - name: CORTEX_API_SPEC
+            value: "/mnt/project/api-spec.json"
+        ports:
+          - containerPort: 8888
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8888
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
+          failureThreshold: 2
+          periodSeconds: 15
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8888
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
+          initialDelaySeconds: 30
+          failureThreshold: 50
+          periodSeconds: 15
+        volumeMounts:
+        - name: workspacedir
+          mountPath: "/mnt/workspace"
+        - name: projectdir
+          mountPath: "/mnt/project"
+      volumes:
+      - name: workspacedir
+        emptyDir: {}
+      - name: projectdir
+        emptyDir: {}
