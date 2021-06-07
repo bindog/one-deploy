@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: summary-deployment
+  name: recommend-deployment
   labels:
-    app: summary
+    app: recommend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: summary
+      app: recommend
   template:
     metadata:
       labels:
-        app: summary
+        app: recommend
     spec:
       initContainers:
       - name: download
@@ -30,7 +30,7 @@ spec:
                 name: ais-config
                 key: nlp_prefix
           - name: MODEL_NAME
-            value: "summary"  # the folder name in http server
+            value: "recommend"  # the folder name in http server
         command: ["wget", "-O", "/mnt/project/deploy.zip", "http://$(FILE_SERVER)/$(NLP_PREFIX)/$(MODEL_NAME)/?op=archive"]
         volumeMounts:
         - name: projectdir
@@ -43,12 +43,9 @@ spec:
         - name: projectdir
           mountPath: "/mnt/project"
       containers:
-      - name: summary-f
-        image: 192.168.4.99:8443/ai/cortex-gpu-test:may
+      - name: recommend-j
+        image: 192.168.4.99:8443/ai/cortex-cpu-test:may
         imagePullPolicy: IfNotPresent
-        resources:
-          limits:
-            aliyun.com/gpu-mem: 5
         env:
           - name: CORTEX_API_SPEC
             value: "/mnt/project/api-spec.json"
@@ -96,10 +93,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: summary-service
+  name: recommend-service
 spec:
   selector:
-    app: summary
+    app: recommend
   ports:
     - protocol: TCP
       port: 9999

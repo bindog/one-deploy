@@ -61,8 +61,17 @@ spec:
             httpHeaders:
               - name: Content-Type
                 value: application/json
-          failureThreshold: 2
-          periodSeconds: 15
+          failureThreshold: 15
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8888
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
+          failureThreshold: 3
+          periodSeconds: 60
         startupProbe:
           httpGet:
             path: /
