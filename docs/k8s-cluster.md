@@ -1,4 +1,11 @@
-## firewall-cmd
+## 故障恢复
+
+理论上部署了k8s系统后，断电后无需担心服务的恢复问题。但由于Habor镜像库并非安装在k8s系统中，而是采用docker-compose方式进行管理，因此断电后需要检查Habor镜像库是否正常，若不正常需要手动恢复
+
+
+## firewall-cmd相关配置
+
+依次对集群中所有节点做如下防火墙配置
 
 ```bash
 firewall-cmd --permanent --add-port=22/tcp
