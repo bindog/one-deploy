@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fileserver-deployment
+  labels:
+    app: fileserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fileserver 
+  template:
+    metadata:
+      labels:
+        app: fileserver
+    spec:
+      containers:
+      - name: fileserver-cc
+        image: 192.168.4.99:8443/ai/gohttpserver:v1.0
+        imagePullPolicy: IfNotPresent
+        args: ["--upload"]
+        ports:
+          - containerPort: 8000
+        volumeMounts:
+        - name: filedir
+          mountPath: "/app/public"
+      volumes:
+      - name: filedir
+        hostPath:
+          path: "/mnt/dl/public/serving-models"
+          type: Directory
+      nodeSelector:
+        fileserver: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fileserver-service
+spec:
+  selector:
+    app: fileserver
+  ports:
+    - protocol: TCP
+      port: 8792
+      targetPort: 8000
