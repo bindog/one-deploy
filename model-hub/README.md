@@ -3,5 +3,5 @@ Build a file server from: [gohttpserver](https://github.com/codeskyblue/gohttpse
 Put all your model and code file here
 
 ```bash
-docker run -it --rm -p 8799:8000 -v $PWD:/app/public --name gohttpserver codeskyblue/gohttpserver --upload
+docker run -d --restart unless-stopped -p 8792:8000 -v $PWD:/app/public --name gohttpserver codeskyblue/gohttpserver --upload
 ```
