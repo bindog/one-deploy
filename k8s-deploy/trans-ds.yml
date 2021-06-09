@@ -38,7 +38,7 @@ spec:
       - name: install
         image: busybox
         imagePullPolicy: IfNotPresent
-        command: ["unzip", "/mnt/project/deploy.zip", "-d", "/mnt/project"]
+        command: ["unzip", "-o", "/mnt/project/deploy.zip", "-d", "/mnt/project"]
         volumeMounts:
         - name: projectdir
           mountPath: "/mnt/project"
