@@ -44,7 +44,7 @@ spec:
           mountPath: "/mnt/project"
       containers:
       - name: seg-c
-        image: 192.168.4.99:8443/ai/cortex-cpu-test:may
+        image: 192.168.4.99:8443/ai/dl-nlp-base-cpu:v1.0
         imagePullPolicy: Always
         env:
           - name: CORTEX_API_SPEC

@@ -44,7 +44,7 @@ spec:
           mountPath: "/mnt/project"
       containers:
       - name: sembeddings-g
-        image: 192.168.4.99:8443/ai/cortex-gpu-test:may
+        image: 192.168.4.99:8443/ai/dl-nlp-base:v1.0
         imagePullPolicy: IfNotPresent
         resources:
           limits:
