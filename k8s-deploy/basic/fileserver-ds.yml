@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: fileserver-cc
-        image: 192.168.4.99:8443/ai/gohttpserver:v1.0
+        image: codeskyblue/gohttpserver:latest
         imagePullPolicy: IfNotPresent
         args: ["--upload"]
         ports:
