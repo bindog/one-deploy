@@ -1,0 +1,9 @@
+{
+    "namespace": "ais",
+    "name": "summary",
+    "model_name": "summary",
+    "image": "192.168.4.99:8443/ai/dl-nlp-base:v1.0",
+    "gpu": true,
+    "gpu_mem": 5,
+    "replicas": 2
+}

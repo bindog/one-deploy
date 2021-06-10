@@ -1,0 +1,10 @@
+{
+    "namespace": "ais",
+    "name": "clscommon",
+    "model_name": "clscommon",
+    "image": "192.168.4.99:8443/ai/dl-nlp-base:v1.0",
+    "gpu": true,
+    "gpu_mem": 6,
+    "replicas": 2
+}
+

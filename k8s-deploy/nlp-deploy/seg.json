@@ -1,0 +1,10 @@
+{
+    "namespace": "ais",
+    "name": "seg",
+    "model_name": "seg",
+    "image": "192.168.4.99:8443/ai/dl-nlp-base-cpu:v1.0",
+    "gpu": false,
+    "gpu_mem": null,
+    "replicas": 1
+}
+

@@ -1,18 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: seg-deployment
+  name: {{ name }}-deployment
+  namespace: {{ namespace }}
   labels:
-    app: seg
+    app: {{ name }}
 spec:
-  replicas: 1
+  replicas: {{ replicas }}
   selector:
     matchLabels:
-      app: seg
+      app: {{ name }}
   template:
     metadata:
       labels:
-        app: seg
+        app: {{ name  }}
     spec:
       initContainers:
       - name: download
@@ -30,7 +31,7 @@ spec:
                 name: ais-config
                 key: nlp_prefix
           - name: MODEL_NAME
-            value: "seg"  # the folder name in http server
+            value: "{{ model_name }}"
         command: ["wget", "-O", "/mnt/project/deploy.zip", "http://$(FILE_SERVER)/$(NLP_PREFIX)/$(MODEL_NAME)/?op=archive"]
         volumeMounts:
         - name: projectdir
@@ -43,9 +44,14 @@ spec:
         - name: projectdir
           mountPath: "/mnt/project"
       containers:
-      - name: seg-c
-        image: 192.168.4.99:8443/ai/dl-nlp-base-cpu:v1.0
-        imagePullPolicy: Always
+      - name: {{ name }}-c
+        image: {{ image }}
+        imagePullPolicy: IfNotPresent
+        {% if gpu %}
+        resources:
+          limits:
+            aliyun.com/gpu-mem: {{ gpu_mem }}
+        {% endif %}
         env:
           - name: CORTEX_API_SPEC
             value: "/mnt/project/api-spec.json"
@@ -55,6 +61,9 @@ spec:
           httpGet:
             path: /
             port: 8888
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
           failureThreshold: 15
           periodSeconds: 60
         readinessProbe:
@@ -70,6 +79,9 @@ spec:
           httpGet:
             path: /
             port: 8888
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
           initialDelaySeconds: 30
           failureThreshold: 50
           periodSeconds: 15
@@ -87,10 +99,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: seg-service
+  name: {{ name }}-service
+  namespace: {{ namespace }}
 spec:
   selector:
-    app: seg
+    app: {{ name }}
   ports:
     - protocol: TCP
       port: 9999

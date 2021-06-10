@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: insightface-deployment
+  namespace: ais
   labels:
     app: insightface
 spec:
@@ -67,6 +68,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: insightface-service
+  namespace: ais
 spec:
   selector:
     app: insightface
