@@ -63,6 +63,34 @@ spec:
             aliyun.com/gpu-mem: 5
         ports:
           - containerPort: 18080
+        livenessProbe:
+          httpGet:
+            path: /docs
+            port: 18080
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
+          failureThreshold: 15
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /docs
+            port: 18080
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
+          failureThreshold: 3
+          periodSeconds: 60
+        startupProbe:
+          httpGet:
+            path: /docs
+            port: 18080
+            httpHeaders:
+              - name: Content-Type
+                value: application/json
+          initialDelaySeconds: 30
+          failureThreshold: 50
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
